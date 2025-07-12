@@ -1,7 +1,8 @@
 flask
 flask-cors
-langgraph
+langchain
 langchain-google-genai
-supabase
+langchain-core
+pydantic
 python-dotenv
-uuid
+google-generativeai
