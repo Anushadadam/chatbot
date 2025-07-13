@@ -6,7 +6,7 @@ import traceback
 
 from database import init_db, get_user_id
 from memory import add_message_to_history, get_chat_history
-from agent import create_agent_executor  # Import the function, not the instance
+from agent import create_agent_executor ,get_welcome_message # Import the function, not the instance
 
 # --- CRITICAL: LOAD ENV AND CHECK FOR API KEY ---
 load_dotenv()
@@ -29,6 +29,9 @@ def login():
     if not user_name:
         return jsonify({"error": "Name is required"}), 400
     get_user_id(user_name)
+    welcome = get_welcome_message()
+    add_message_to_history(user_name, 'ai', welcome)
+
     return jsonify({"message": f"Welcome, {user_name}!"}), 200
 
 @app.route('/api/history', methods=['GET'])
@@ -63,7 +66,7 @@ def chat():
         print(f"History: {len(chat_history)} messages")
         
         # 2. Create agent executor for this user
-        agent_executor = create_agent_executor(user_name)
+        agent_executor = create_agent_executor()
         print("Agent executor created")
         
         # 3. Invoke the agent

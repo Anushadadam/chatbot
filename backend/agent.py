@@ -20,14 +20,13 @@ llm = ChatGoogleGenerativeAI(
     api_key=GOOGLE_API_KEY
 )
 
-def create_agent_executor(user_name: str):
+def create_agent_executor():
     """Creates the agent executor for a specific user"""
     # System message template
-    system_template = f"""You are a helpful personal assistant for a user named {user_name}.
+    system_template = f"""You are a helpful personal assistant for a user named .
     
     **STRICT RULES:**
     1. Use tools for ALL to-do list operations
-    2. ALWAYS provide 'user_name' in tool calls with value '{user_name}'
     3. For vague removal requests, list todos first to clarify
     """
     
@@ -58,4 +57,6 @@ def create_agent_executor(user_name: str):
         return_intermediate_steps=False
     )
 # Create a single executor instance
-agent_executor = create_agent_executor("Anusha")
+agent_executor = create_agent_executor()
+def get_welcome_message():
+    return "👋 Welcome! I can help you manage your to-do list. Try asking me to add or list your tasks."
