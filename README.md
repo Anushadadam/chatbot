@@ -13,6 +13,18 @@ This project is a AI chatbot built with an agentic architecture. It features a c
 - **Structured Architecture**: Clear separation of concerns with well-defined agentic components
 
 ## Architecture
+1. User sends message via React frontend.
+2. Flask backend routes the request to the agent executor.
+3. Agent processes the input using:
+   - Current prompt template
+   - Retrieved chat history (memory)
+   - Available tools
+4. Agent decides whether to:
+   - Use tools (e.g., interact with database), or
+   - Directly generate a response
+5. Tools (if used) interact with the SQLite database.
+6. Agent generates and sends a response back to the user.
+7. The entire conversation is stored in memory for future context.
 
 The application follows a classic three-tier architecture with clear agentic components:
 
