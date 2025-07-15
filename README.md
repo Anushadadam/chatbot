@@ -1,26 +1,20 @@
-# Snello SDE Internship - Take-Home Assignment
+# Snello Agent: To-Do List Chatbot with Agentic Architecture
 
-This project is a fully functional AI chatbot built with an agentic architecture. It features a conversational AI powered by Google's Gemini Pro, a persistent to-do list, and a sleek web interface built with React.
 
-## Demo
-
- <!-- Replace with a screenshot of your app -->
+This project is a AI chatbot built with an agentic architecture. It features a conversational AI powered by Google's Gemini Flash, a persistent to-do list, and a sleek web interface built with React.
 
 ## Features
 
--   **Conversational Memory:** The agent remembers past interactions within a session and persists them in a database for future sessions.
--   **To-Do List Management:** Users can add, view, and remove items from a personal to-do list.
--   **Tool-Using Agent:** The agent uses specific tools (`add_todo`, `list_todos`, `remove_todo`) to interact with the user's data, demonstrating a core principle of agentic design.
--   **Deadline Support:** Users can add optional deadlines to their to-do items (e.g., "Add 'review PRs' with deadline EOD").
--   **Persistent Storage:** All user data, to-do lists, and chat histories are stored in a local SQLite database.
--   **Web UI:** A clean and responsive user interface built with React and Material-UI, featuring a separate login and chat page.
--   **User Suggestions:** The UI provides helpful suggestion chips to guide the user on what they can ask.
+- **Conversational Memory**: The agent remembers past interactions within a session and persists them in a database for future sessions
+- **To-Do List Management**: Users can add, view, and remove items from their personal to-do list
+- **Tool-Using Agent**: The agent uses specific tools (`add_todo`, `list_todos`, `remove_todo`) to interact with user data
+- **Persistent Storage**: All user data, to-do lists, and chat histories are stored in a local SQLite database
+- **Web UI**: Clean and responsive user interface with separate login and chat pages
+- **Structured Architecture**: Clear separation of concerns with well-defined agentic components
 
 ## Architecture
 
-The application follows a classic three-tier architecture: a React frontend, a Python (Flask) backend, and an SQLite database.
-
-### Agentic Flow Diagram
+The application follows a classic three-tier architecture with clear agentic components:
 
 ```
 [React Frontend] --- (HTTP POST /api/chat) ---> [Flask Backend]
@@ -34,90 +28,150 @@ The application follows a classic three-tier architecture: a React frontend, a P
       |                                                |                                         |
       +--- [Python Tools (add/list/remove)] <--- (Invokes tool)                                  |
             (Interacts with SQLite)                                                    [SQLite Database]
-
 ```
 
-### Key Components
+### Agentic Components
 
--   **LLM (Planner):** `Google Gemini Pro` is used as the brain of the agent. It decides whether to make a direct conversational reply or to use one of the provided tools based on the user's input.
--   **Tools (Executor):** The `tools.py` module defines three functions decorated with LangChain's `@tool` decorator: `add_todo`, `list_todos`, and `remove_todo`. These functions contain the logic to interact directly with the SQLite database. Pydantic schemas are used to enforce typed arguments for the tools.
--   **Memory:**
-    1.  **Conversation History:** Chat history is explicitly stored in the `chat_history` table in SQLite, linked to a `user_id`. It is loaded at the start of each interaction and passed to the agent's prompt, providing long-term memory.
-    2.  **To-Do List State:** The to-do list is not stored in conversational memory but as structured data in the `todos` table. The agent accesses and modifies this state *only* through its tools, preventing hallucination and ensuring data integrity.
--   **Prompt:** The `agent.py` file contains a carefully crafted `ChatPromptTemplate`. It gives the LLM its persona, instructions on how and when to use tools, and injects the `user_name` directly into the instructions to ensure the agent always acts on behalf of the correct user.
+| Component       | Implementation Location | Description |
+|-----------------|--------------------------|-------------|
+| **LLM (Planner)** | `agent.py` | Google Gemini 1.5 Flash model that decides whether to use tools or generate a response |
+| **Tools (Executor)** | `tools.py` | Three functions decorated with LangChain's `@tool` that interact with the database |
+| **Memory** | `memory.py` | Manages storage and retrieval of conversation history in SQLite |
+| **Prompt** | `agent.py` | Carefully crafted ChatPromptTemplate with system instructions and placeholders |
+| **Agent Executor** | `agent.py` | Orchestrates the agent's decision-making process |
+
+## Memory System
+
+### How Memory is Stored and Retrieved
+
+**Storage:**
+- Messages are stored in an SQLite database (`chat_history` table)
+- Each message is recorded with:
+  - `user_id`: Links to user table
+  - `role`: 'human' or 'ai'
+  - `content`: Message text
+  - `timestamp`: Automatic timestamp
+
+**Retrieval:**
+- History is fetched chronologically using `get_chat_history()` function
+- Converted to LangChain message objects (HumanMessage/AIMessage)
+- Added to agent context via `MessagesPlaceholder` in prompt template
+
+## Tool System
+
+### How Tools are Defined and Registered
+
+**Tool Definition (tools.py):**
+- Each tool is defined with the `@tool` decorator
+- Pydantic schemas validate parameters
+- Tools contain database interaction logic
+- Three core tools:
+  1. `add_todo`: Adds task to user's to-do list
+  2. `list_todos`: Returns formatted task list with indexes
+  3. `remove_todo`: Marks task as completed by index
+
+**Tool Registration (agent.py):**
+- Tools are imported from `tools.py`
+- Passed to agent during creation:
+  ```python
+  agent = create_tool_calling_agent(
+      llm=llm,
+      tools=all_tools,
+      prompt=prompt
+  )
+  ```
 
 ## Setup and Run Instructions
 
 ### Prerequisites
+- Python 3.9+
+- Node.js 16+
+- Google API key (for Gemini)
 
--   Python 3.8+
--   Node.js and npm
--   A Google AI Studio API Key
+### Installation Steps
 
-### 1. Clone the Repository
+1. **Backend Setup**:
+   ```bash
+   cd backend
+   
+   # Create virtual environment
+   python -m venv venv
+   source venv/bin/activate  # Linux/MacOS
+   venv\Scripts\activate    # Windows
+   
+   # Install dependencies
+   pip install -r requirements.txt
+   
+   # Set up environment variables
+   echo "GOOGLE_API_KEY='your_api_key_here'" > .env
+   ```
 
-```bash
-git clone <your-repo-url>
-cd snello-agent-project
-```
+2. **Frontend Setup**:
+   ```bash
+   cd ../frontend
+   npm install
+   ```
 
-### 2. Backend Setup
+### Running the Application
 
-```bash
-cd backend
+1. **Start Backend** (in backend directory):
+   ```bash
+   python app.py
+   # Server runs at http://localhost:5002
+   ```
 
-# Create a virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+2. **Start Frontend** (in frontend directory):
+   ```bash
+   npm start
+   # Application opens at http://localhost:3000
+   ```
 
-# Install dependencies
-pip install -r requirements.txt
+3. **Database Initialization**:
+   - SQLite database auto-initializes on first run
+   - Creates `snello_agent.db` with necessary tables
 
-# Create the .env file and add your API key
-echo "GOOGLE_API_KEY='YOUR_GOOGLE_AI_STUDIO_API_KEY'" > .env
+## Example Prompts
 
-# Run the backend server
-python app.py
-```
-The backend will be running at `http://localhost:5001`.
+Try these interactions with your chatbot:
 
-### 3. Frontend Setup
+1. **Add task**  
+   "Add 'Buy groceries' to my to-do list"
+   
+2. **List tasks**  
+   "What's on my to-do list?"
+   
+3. **Remove task**  
+   "Remove the second item from my list"
+   
+4. **Complex workflow**  
+   "I finished my homework, please remove it from my list"
 
-Open a new terminal window.
-
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Run the frontend development server
-npm start
-```
-Your browser will automatically open to `http://localhost:3000`.
-
-## Example Conversation
-
-**User:** Hey!
-
-**Agent:** Hey! What can I help you with today?
-
-**User:** Add "Finish LangChain tutorial" to my to-do list.
-
-**Agent:** Got it! I've added "Finish LangChain tutorial" to your to-do list.
-
-**User:** What's on my list?
-
-**Agent:** Current to-do list:
-1. Finish LangChain tutorial
-
-**User:** Also add "Submit the take-home assignment by Friday"
-
-**Agent:** I've added "Submit the take-home assignment by Friday" to your to-do list with a deadline of Friday.
+**Sample Conversation:**  
+**User**: Add "Prepare presentation" to my list  
+**Agent**: ✅ Added 'Prepare presentation' to your todo list  
+**User**: What do I need to do today?  
+**Agent**: Here's your to-do list:  
+1. Buy groceries  
+2. Prepare presentation  
+**User**: Remove the first item  
+**Agent**: 🗑️ Removed: Buy groceries  
 
 ## Limitations & Future Improvements
 
--   **Streaming:** Responses are not streamed, so the user has to wait for the full agent chain to complete. Implementing streaming would significantly improve the user experience.
--   **Error Handling:** The current error handling is basic. A more robust system would provide more specific feedback to the user on the frontend.
--   **Authentication:** The current login system is for demonstration purposes. A real-world application would require a secure authentication system (e.g., JWT, OAuth).
--   **Scalability:** For a production environment, SQLite would be replaced with a more scalable database like PostgreSQL, and the Flask app would be deployed behind a production-grade web server like Gunicorn or Nginx.
+### Current Limitations
+1. **Basic Authentication**: Only uses names for user identification
+2. **Limited Toolset**: Only supports add/list/remove operations
+3. **No Streaming**: Responses are delivered all at once
+4. **Error Handling**: Basic error messages with limited recovery
+5. **Scalability**: SQLite not suitable for large-scale deployment
+
+### Future Improvements
+| Improvement Area | Description |
+|------------------|-------------|
+| **Enhanced Tools** | Add task modification, deadlines, and prioritization |
+| **Authentication** | Implement JWT or OAuth for secure login |
+| **Streaming Responses** | Deliver responses incrementally for better UX |
+| **Advanced Memory** | Implement conversation summarization for long histories |
+| **Multi-Agent System** | Create specialized agents for different tasks |
+| **Production Deployment** | Switch to PostgreSQL and add Gunicorn/Nginx |
+| **Frontend Enhancements** | Add task management UI and real-time updates |
