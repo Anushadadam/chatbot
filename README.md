@@ -94,10 +94,6 @@ The application follows a classic three-tier architecture with clear agentic com
    ```bash
    cd backend
    
-   # Create virtual environment
-   python -m venv venv
-   source venv/bin/activate  # Linux/MacOS
-   venv\Scripts\activate    # Windows
    
    # Install dependencies
    pip install -r requirements.txt
@@ -142,14 +138,11 @@ Try these interactions with your chatbot:
    
 3. **Remove task**  
    "Remove the second item from my list"
-   
-4. **Complex workflow**  
-   "I finished my homework, please remove it from my list"
 
 **Sample Conversation:**  
 **User**: Add "Prepare presentation" to my list  
 **Agent**: ✅ Added 'Prepare presentation' to your todo list  
-**User**: What do I need to do today?  
+**User**: list my todos?  
 **Agent**: Here's your to-do list:  
 1. Buy groceries  
 2. Prepare presentation  
